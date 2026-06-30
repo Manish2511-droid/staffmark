@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StaffMark — Green Integrated Pest Control</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
+
+:root {
+  --bg:         #08090b;
+  --surface:    #101216;
+  --surface2:   #16191e;
+  --surface3:   #1c2027;
+  --border:     rgba(255,255,255,0.07);
+  --border-h:   rgba(255,255,255,0.14);
+  --g1:         #22c55e;
+  --g2:         #16a34a;
+  --g-dim:      rgba(34,197,94,0.09);
+  --g-dim2:     rgba(34,197,94,0.16);
+  --gold:       #f0b429;
+  --gold-dim:   rgba(240,180,41,0.10);
+  --gold-dim2:  rgba(240,180,41,0.18);
+  --warn:       #fb923c;
+  --warn-dim:   rgba(251,146,60,0.10);
+  --danger:     #f87171;
+  --danger-dim: rgba(248,113,113,0.10);
+  --blue:       #60a5fa;
+  --blue-dim:   rgba(96,165,250,0.10);
+  --text:       #f4f5f7;
+  --text2:      #9ca3af;
+  --text3:      #5b6270;
+  --r:          14px;
+  --r-sm:       10px;
+  --r-xs:       7px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(34,197,94,0.06), transparent 55%),
+    radial-gradient(ellipse 700px 400px at 100% 0%, rgba(240,180,41,0.04), transparent 55%),
+    var(--bg);
+  color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border-h);border-radius:10px;}
+
+nav{
+  background:rgba(16,18,22,0.78);
+  backdrop-filter:blur(20px) saturate(160%);
+  border-bottom:1px solid var(--border);
+  padding:0 28px;
+  display:flex;align-items:center;gap:14px;
+  height:64px;position:sticky;top:0;z-index:100;
+}
+.logo-wrap{display:flex;align-items:center;gap:11px;}
+.logo-icon{
+  width:34px;height:34px;border-radius:9px;
+  background:linear-gradient(135deg,var(--g2),var(--g1));
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;box-shadow:0 0 0 1px var(--border);
+}
+.logo-text-wrap{line-height:1.15;}
+.logo-text{font-weight:800;font-size:16px;letter-spacing:-0.4px;color:var(--text);}
+.logo-text .accent{color:var(--g1);}
+.logo-sub{font-size:10.5px;font-weight:500;color:var(--text3);letter-spacing:0.2px;}
+
+.nav-center{margin-left:auto;display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:3px;}
+.tab{
+  background:none;border:none;color:var(--text2);
+  padding:7px 15px;border-radius:8px;
+  cursor:pointer;font-size:13px;font-family:inherit;font-weight:500;
+  transition:all 0.15s;display:flex;align-items:center;gap:6px;
+}
+.tab:hover{color:var(--text);}
+.tab.active{background:var(--surface3);color:var(--text);font-weight:600;box-shadow:0 1px 0 rgba(255,255,255,0.04) inset, 0 1px 3px rgba(0,0,0,0.3);}
+.tab-icon{font-size:13px;opacity:0.85;}
+
+.logout-btn{
+  margin-left:10px;background:none;border:1px solid var(--border);color:var(--text3);
+  padding:7px 13px;border-radius:9px;font-size:12.5px;font-weight:500;cursor:pointer;
+  font-family:inherit;transition:all 0.15s;display:flex;align-items:center;gap:6px;
+}
+.logout-btn:hover{border-color:var(--border-h);color:var(--text2);}
+
+.page{display:none;padding:32px 28px 60px;max-width:1040px;margin:0 auto;}
+.page.show{display:block;animation:fadeIn 0.25s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:26px;flex-wrap:wrap;gap:14px;}
+.ph-title{font-size:21px;font-weight:800;letter-spacing:-0.4px;color:var(--text);}
+.ph-sub{font-size:13px;color:var(--text3);margin-top:4px;font-weight:400;}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:24px;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 19px;transition:border-color 0.15s;}
+.stat:hover{border-color:var(--border-h);}
+.stat-label{font-size:11px;color:var(--text3);margin-bottom:7px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
+.stat-val{font-size:23px;font-weight:800;font-family:'JetBrains Mono',monospace;letter-spacing:-0.5px;}
+.stat-val.g{color:var(--g1);} .stat-val.gold{color:var(--gold);} .stat-val.r{color:var(--danger);} .stat-val.b{color:var(--blue);}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:14px;transition:border-color 0.15s;}
+.card:hover{border-color:var(--border-h);}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:17px;flex-wrap:wrap;gap:10px;}
+.card-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.7px;}
+
+.tbl-wrap{overflow-x:auto;}
+.tbl{width:100%;border-collapse:collapse;min-width:540px;}
+.tbl th{font-size:10.5px;color:var(--text3);text-transform:uppercase;letter-spacing:0.6px;padding:0 14px 11px;text-align:left;border-bottom:1px solid var(--border);font-weight:700;}
+.tbl td{padding:14px;font-size:13.5px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tbody tr{transition:background 0.1s;}
+.tbl tbody tr:hover td{background:rgba(255,255,255,0.015);}
+
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:13px;}
+.fl{font-size:12px;color:var(--text2);display:block;margin-bottom:6px;font-weight:600;letter-spacing:0.1px;}
+input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);padding:10px 13px;font-size:13.5px;font-family:inherit;outline:none;transition:all 0.15s;}
+input:hover,select:hover{border-color:var(--border-h);}
+input:focus,select:focus{border-color:var(--g1);background:var(--surface3);box-shadow:0 0 0 3px rgba(34,197,94,0.1);}
+input::placeholder{color:var(--text3);}
+select option{background:var(--surface2);color:var(--text);}
+
+.btn{padding:9px 17px;border-radius:var(--r-sm);border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;display:inline-flex;align-items:center;gap:6px;letter-spacing:0.1px;}
+.btn-p{background:linear-gradient(180deg,#34d873,var(--g2));color:#05130a;box-shadow:0 1px 0 rgba(255,255,255,0.25) inset, 0 4px 14px -4px rgba(34,197,94,0.5);}
+.btn-p:hover{filter:brightness(1.05);}
+.btn-p:active{transform:translateY(1px);}
+.btn-gold{background:linear-gradient(180deg,#fcc94d,var(--gold));color:#241800;box-shadow:0 1px 0 rgba(255,255,255,0.3) inset, 0 4px 14px -4px rgba(240,180,41,0.5);}
+.btn-gold:hover{filter:brightness(1.05);}
+.btn-o{background:var(--surface2);border:1px solid var(--border);color:var(--text2);}
+.btn-o:hover{border-color:var(--border-h);color:var(--text);}
+.btn-d{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(248,113,113,0.18);}
+.btn-d:hover{background:rgba(248,113,113,0.16);}
+.btn-w{background:var(--warn-dim);color:var(--warn);border:1px solid rgba(251,146,60,0.18);}
+.btn-w:hover{background:rgba(251,146,60,0.16);}
+.btn-b{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(96,165,250,0.18);}
+.btn-b:hover{background:rgba(96,165,250,0.16);}
+.btn-sm{padding:6px 12px;font-size:12px;}
+.btn:disabled{opacity:0.45;cursor:not-allowed;}
+
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:7px;font-size:11px;font-weight:600;letter-spacing:0.1px;}
+.chip-g{background:var(--g-dim2);color:var(--g1);}
+.chip-r{background:var(--danger-dim);color:var(--danger);}
+.chip-o{background:var(--warn-dim);color:var(--warn);}
+.chip-b{background:var(--blue-dim);color:var(--blue);}
+.chip-gold{background:var(--gold-dim2);color:var(--gold);}
+.chip-gray{background:var(--surface3);color:var(--text2);}
+
+.att-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:14px;transition:border-color 0.15s;}
+.att-card:hover{border-color:var(--border-h);}
+.att-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:18px;}
+.att-name{font-weight:700;font-size:15.5px;color:var(--text);}
+.att-role{font-size:12px;color:var(--text3);margin-top:2px;}
+.att-chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.att-actions{display:flex;gap:6px;flex-wrap:wrap;}
+
+.day-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:6px;}
+.day-btn{aspect-ratio:1;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text3);font-size:10px;font-weight:700;cursor:pointer;transition:all 0.12s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;}
+.day-btn .dn{font-size:12.5px;font-weight:700;line-height:1;}
+.day-btn .ds{font-size:8px;font-weight:700;opacity:0.85;}
+.day-btn:hover{border-color:var(--border-h);}
+.day-btn.present{background:var(--g-dim2);border-color:rgba(34,197,94,0.4);color:var(--g1);}
+.day-btn.absent{background:var(--danger-dim);border-color:rgba(248,113,113,0.4);color:var(--danger);}
+.day-btn.half{background:var(--warn-dim);border-color:rgba(251,146,60,0.4);color:var(--warn);}
+
+.breakdown{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:16px 17px;margin-top:16px;}
+.brow{display:flex;justify-content:space-between;align-items:center;padding:8px 2px;font-size:13px;border-bottom:1px solid var(--border);}
+.brow:last-child{border-bottom:none;}
+.brow-label{color:var(--text2);}
+.brow-val{font-weight:600;font-family:'JetBrains Mono',monospace;}
+.brow.total{padding-top:14px;margin-top:2px;}
+.brow.total .brow-label{font-weight:700;font-size:14.5px;color:var(--text);}
+.brow.total .brow-val{font-size:19px;color:var(--g1);}
+.credit{color:var(--g1);}
+.deduct{color:var(--danger);}
+
+.hist-wrap{margin-top:15px;border-top:1px solid var(--border);padding-top:15px;}
+.hist-title{font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:9px;}
+.hist-item{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:var(--r-xs);font-size:12.5px;background:var(--surface2);margin-bottom:6px;}
+.hist-item:last-child{margin-bottom:0;}
+.hist-left{color:var(--text2);}
+.hist-right{display:flex;align-items:center;gap:10px;}
+.hist-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:3px 6px;border-radius:5px;transition:all 0.1s;line-height:1;}
+.hist-del:hover{color:var(--danger);background:var(--danger-dim);}
+
+.payroll-banner{background:linear-gradient(135deg,var(--g-dim),var(--surface) 60%);border:1px solid rgba(34,197,94,0.22);border-radius:var(--r);padding:24px 26px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+.payroll-label{font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;}
+.payroll-amount{font-size:31px;font-weight:800;color:var(--g1);font-family:'JetBrains Mono',monospace;line-height:1.15;letter-spacing:-0.6px;}
+.payroll-sub{font-size:12px;color:var(--text3);margin-top:3px;}
+
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center;padding:16px;}
+.mbg.open{display:flex;animation:fadeIn 0.15s ease;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:26px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 48px -12px rgba(0,0,0,0.6);}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:18px;color:var(--text);display:flex;align-items:center;gap:9px;}
+.modal-icon{font-size:18px;}
+
+.mnav{display:flex;align-items:center;gap:10px;}
+.mlabel{font-size:13.5px;font-weight:700;min-width:140px;text-align:center;color:var(--text);}
+
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:20px;}
+.leg{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text2);font-weight:500;}
+.leg-dot{width:10px;height:10px;border-radius:3px;}
+
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--g1);color:#05130a;padding:11px 22px;border-radius:11px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:all 0.3s;z-index:999;box-shadow:0 12px 28px -6px rgba(0,0,0,0.4);white-space:nowrap;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+.empty{text-align:center;padding:56px 20px;color:var(--text3);font-size:13.5px;line-height:1.6;}
+.empty-icon{font-size:30px;margin-bottom:12px;opacity:0.6;}
+
+.flex{display:flex;gap:8px;align-items:center;}
+.flex-end{justify-content:flex-end;}
+.mt{margin-top:14px;}
+.mono{font-family:'JetBrains Mono',monospace;}
+
+@media(max-width:640px){
+  nav{padding:0 14px;}
+  .tab{padding:6px 10px;font-size:12px;}
+  .tab-icon{display:none;}
+  .logout-btn span.lbl{display:none;}
+  .page{padding:18px 14px 50px;}
+  .ph-title{font-size:18px;}
+  .payroll-amount{font-size:25px;}
+  .logo-sub{display:none;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo-wrap">
+    <div class="logo-icon">🌿</div>
+    <div class="logo-text-wrap">
+      <div class="logo-text">Staff<span class="accent">Mark</span></div>
+      <div class="logo-sub">Green Integrated Pest Control</div>
+    </div>
+  </div>
+  <div class="nav-center">
+    <button class="tab active" onclick="goTab('employees',this)"><span class="tab-icon">👥</span>Staff</button>
+    <button class="tab" onclick="goTab('attendance',this)"><span class="tab-icon">📋</span>Attendance</button>
+    <button class="tab" onclick="goTab('salary',this)"><span class="tab-icon">💰</span>Salary</button>
+    <button class="tab" onclick="goTab('history',this)"><span class="tab-icon">🕐</span>History</button>
+  </div>
+  <button class="logout-btn" onclick="doLogout()">⎋<span class="lbl">Sign out</span></button>
+</nav>
+
+<div class="page show" id="pg-employees">
+  <div class="ph">
+    <div>
+      <div class="ph-title">Staff Members</div>
+      <div class="ph-sub">Manage your team</div>
+    </div>
+    <button class="btn btn-p" onclick="openModal('m-add-emp')">＋ Add Staff</button>
+  </div>
+  <div class="stats" id="emp-stats"></div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">All Employees</div></div>
+    <div class="tbl-wrap"><div id="emp-table"></div></div>
+  </div>
+</div>
+
+<div class="page" id="pg-attendance">
+  <div class="ph">
+    <div>
+      <div class="ph-title">Attendance</div>
+      <div class="ph-sub">Mark daily attendance</div>
+    </div>
+    <div class="mnav">
+      <button class="btn btn-o btn-sm" onclick="changeMonth(-1)">◀</button>
+      <div class="mlabel" id="att-month-label"></div>
+      <button class="btn btn-o btn-sm" onclick="changeMonth(1)">▶</button>
+    </div>
+  </div>
+  <div class="legend">
+    <div class="leg"><div class="leg-dot" style="background:var(--g1)"></div>Present</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--danger)"></div>Absent</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--warn)"></div>Half Day</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--surface2)"></div>Not Marked</div>
+  </div>
+  <div id="att-list"></div>
+</div>
+
+<div class="page" id="pg-salary">
+  <div class="ph">
+    <div>
+      <div class="ph-title">Salary</div>
+      <div class="ph-sub">Automatically calculated from attendance</div>
+    </div>
+    <div class="mnav">
+      <button class="btn btn-o btn-sm" onclick="changeMonth(-1)">◀</button>
+      <div class="mlabel" id="sal-month-label"></div>
+      <button class="btn btn-o btn-sm" onclick="changeMonth(1)">▶</button>
+    </div>
+  </div>
+  <div id="sal-list"></div>
+</div>
+
+<div class="page" id="pg-history">
+  <div class="ph">
+    <div>
+      <div class="ph-title">Salary History</div>
+      <div class="ph-sub">Records from previous months</div>
+    </div>
+    <select id="hist-emp-filter" onchange="renderHistory()" style="width:auto;min-width:170px;">
+      <option value="all">All Employees</option>
+    </select>
+  </div>
+  <div id="hist-list"></div>
+</div>
+
+<div class="mbg" id="m-add-emp">
+  <div class="modal">
+    <div class="modal-title"><span class="modal-icon">➕</span>Add New Staff</div>
+    <div class="fg">
+      <div><label class="fl">Name *</label><input id="a-name" placeholder="Employee name"/></div>
+      <div><label class="fl">Mobile</label><input id="a-phone" placeholder="9876543210"/></div>
+      <div><label class="fl">Role</label><input id="a-role" placeholder="Technician, Helper..."/></div>
+      <div><label class="fl">Monthly Salary (₹) *</label><input id="a-sal" type="number" placeholder="15000"/></div>
+      <div><label class="fl">Overtime Rate (₹/hour)</label><input id="a-ot" type="number" placeholder="50"/></div>
+      <div><label class="fl">Join Date</label><input id="a-join" type="date"/></div>
+    </div>
+    <div class="flex flex-end mt">
+      <button class="btn btn-o" onclick="closeModal('m-add-emp')">Cancel</button>
+      <button class="btn btn-p" onclick="addEmployee()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="m-edit-emp">
+  <div class="modal">
+    <div class="modal-title"><span class="modal-icon">✏️</span>Edit Employee</div>
+    <input type="hidden" id="e-id"/>
+    <div class="fg">
+      <div><label class="fl">Name *</label><input id="e-name"/></div>
+      <div><label class="fl">Mobile</label><input id="e-phone"/></div>
+      <div><label class="fl">Role</label><input id="e-role"/></div>
+      <div><label class="fl">Monthly Salary (₹) *</label><input id="e-sal" type="number"/></div>
+      <div><label class="fl">Overtime Rate (₹/hour)</label><input id="e-ot" type="number"/></div>
+    </div>
+    <div class="flex flex-end mt">
+      <button class="btn btn-o" onclick="closeModal('m-edit-emp')">Cancel</button>
+      <button class="btn btn-p" onclick="updateEmployee()">Update</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="m-adv">
+  <div class="modal">
+    <div class="modal-title"><span class="modal-icon">💸</span>Advance / Partial Payment</div>
+    <div id="adv-emp-label" style="font-size:13px;color:var(--text2);margin-bottom:17px;padding:11px 13px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border);"></div>
+    <input type="hidden" id="adv-emp-id"/>
+    <div class="fg">
+      <div><label class="fl">Amount (₹) *</label><input id="adv-amt" type="number" placeholder="5000"/></div>
+      <div><label class="fl">Date</label><input id="adv-date" type="date"/></div>
+      <div style="grid-column:1/-1"><label class="fl">Note (optional)</label><input id="adv-note" placeholder="Emergency, festival bonus..."/></div>
+    </div>
+    <div class="flex flex-end mt">
+      <button class="btn btn-o" onclick="closeModal('m-adv')">Cancel</button>
+      <button class="btn btn-w" onclick="saveAdvance()">Record</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="m-ot">
+  <div class="modal">
+    <div class="modal-title"><span class="modal-icon">⏱️</span>Add Overtime</div>
+    <div id="ot-emp-label" style="font-size:13px;color:var(--text2);margin-bottom:17px;padding:11px 13px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border);"></div>
+    <input type="hidden" id="ot-emp-id"/>
+    <div class="fg">
+      <div><label class="fl">Date</label><input id="ot-date" type="date"/></div>
+      <div><label class="fl">Hours *</label><input id="ot-hrs" type="number" placeholder="2" step="0.5"/></div>
+    </div>
+    <div class="flex flex-end mt">
+      <button class="btn btn-o" onclick="closeModal('m-ot')">Cancel</button>
+      <button class="btn btn-b" onclick="saveOvertime()">Add</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="m-finalize">
+  <div class="modal">
+    <div class="modal-title"><span class="modal-icon">✅</span>Finalize Salary</div>
+    <div id="fin-summary" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:15px;margin-bottom:17px;font-size:13px;color:var(--text2);line-height:1.7;"></div>
+    <p style="font-size:12.5px;color:var(--text3);margin-bottom:18px;">This month's salary will be saved to history. You can view it later in the History tab.</p>
+    <div class="flex flex-end">
+      <button class="btn btn-o" onclick="closeModal('m-finalize')">Cancel</button>
+      <button class="btn btn-gold" onclick="confirmFinalize()">✅ Finalize</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+let employees=[], attData={}, advances={}, overtime={}, salaryHistory=[];
+let curMonth=new Date().getMonth(), curYear=new Date().getFullYear();
+let finalizeEmpId=null;
+
+async function api(path,method='GET',body=null){
+  const opts={method,headers:{'Content-Type':'application/json'}};
+  if(body) opts.body=JSON.stringify(body);
+  const r=await fetch(path,opts);
+  if(r.status===401){ window.location.href='/login'; return; }
+  return r.json();
+}
+
+async function checkAuth(){
+  const r = await fetch('/api/me');
+  const data = await r.json();
+  if(!data.logged_in){ window.location.href='/login'; }
+}
+
+async function doLogout(){
+  await fetch('/api/logout',{method:'POST'});
+  window.location.href='/login';
+}
+
+function toast(msg,color='var(--g1)'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.style.background=color;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+function goTab(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('show'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pg-'+name).classList.add('show');
+  btn.classList.add('active');
+  if(name==='attendance') loadAndRenderAtt();
+  if(name==='salary') loadAndRenderSal();
+  if(name==='history') loadAndRenderHistory();
+}
+
+function monthKey(){ return `${curYear}-${String(curMonth+1).padStart(2,'0')}`; }
+function changeMonth(d){
+  curMonth+=d;
+  if(curMonth>11){curMonth=0;curYear++;}
+  if(curMonth<0){curMonth=11;curYear--;}
+  updateMonthLabels();
+  loadAndRenderAtt();
+  loadAndRenderSal();
+}
+function updateMonthLabels(){
+  const lbl=`${MONTHS[curMonth]} ${curYear}`;
+  document.getElementById('att-month-label').textContent=lbl;
+  document.getElementById('sal-month-label').textContent=lbl;
+}
+
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.mbg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+
+async function loadEmployees(){
+  employees=await api('/api/employees')||[];
+  renderEmployees();
+  updateHistoryFilter();
+}
+
+function renderEmployees(){
+  const total=employees.length;
+  const totalSal=employees.reduce((s,e)=>s+e.salary,0);
+  document.getElementById('emp-stats').innerHTML=`
+    <div class="stat"><div class="stat-label">Total Staff</div><div class="stat-val b">${total}</div></div>
+    <div class="stat"><div class="stat-label">Monthly Payroll</div><div class="stat-val g">₹${totalSal.toLocaleString('en-IN')}</div></div>
+  `;
+  const wrap=document.getElementById('emp-table');
+  if(!employees.length){wrap.innerHTML=`<div class="empty"><div class="empty-icon">👤</div>No staff yet.<br>Click <strong>＋ Add Staff</strong> to get started.</div>`;return;}
+  wrap.innerHTML=`<table class="tbl">
+    <thead><tr><th>Name</th><th>Role</th><th>Mobile</th><th>Salary / Month</th><th>OT Rate</th><th>Actions</th></tr></thead>
+    <tbody>${employees.map(e=>`<tr>
+      <td><strong style="font-size:14px">${e.name}</strong></td>
+      <td><span class="chip chip-g">${e.role}</span></td>
+      <td class="mono" style="color:var(--text2);font-size:12px">${e.phone||'—'}</td>
+      <td><span class="mono" style="color:var(--g1);font-weight:700;font-size:14px">₹${e.salary.toLocaleString('en-IN')}</span></td>
+      <td style="color:var(--text3);font-size:12px">₹${e.ot_rate}/hr</td>
+      <td><div class="flex">
+        <button class="btn btn-o btn-sm" onclick="openEdit(${e.id})">Edit</button>
+        <button class="btn btn-d btn-sm" onclick="delEmployee(${e.id})">Delete</button>
+      </div></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+async function addEmployee(){
+  const name=document.getElementById('a-name').value.trim();
+  const sal=parseFloat(document.getElementById('a-sal').value);
+  if(!name||!sal){toast('⚠️ Name and salary are required','var(--warn)');return;}
+  await api('/api/employees','POST',{name,phone:document.getElementById('a-phone').value.trim(),role:document.getElementById('a-role').value.trim()||'Technician',salary:sal,ot_rate:parseFloat(document.getElementById('a-ot').value)||50,join_date:document.getElementById('a-join').value});
+  ['a-name','a-phone','a-role','a-sal','a-ot'].forEach(id=>document.getElementById(id).value='');
+  closeModal('m-add-emp');
+  await loadEmployees();
+  toast('✅ Employee added');
+}
+
+function openEdit(id){
+  const e=employees.find(x=>x.id===id);
+  document.getElementById('e-id').value=id;
+  document.getElementById('e-name').value=e.name;
+  document.getElementById('e-phone').value=e.phone||'';
+  document.getElementById('e-role').value=e.role;
+  document.getElementById('e-sal').value=e.salary;
+  document.getElementById('e-ot').value=e.ot_rate;
+  openModal('m-edit-emp');
+}
+
+async function updateEmployee(){
+  const id=document.getElementById('e-id').value;
+  await api(`/api/employees/${id}`,'PUT',{name:document.getElementById('e-name').value.trim(),phone:document.getElementById('e-phone').value.trim(),role:document.getElementById('e-role').value.trim(),salary:parseFloat(document.getElementById('e-sal').value),ot_rate:parseFloat(document.getElementById('e-ot').value)});
+  closeModal('m-edit-emp');await loadEmployees();toast('✅ Updated');
+}
+
+async function delEmployee(id){
+  if(!confirm('Remove this employee?'))return;
+  await api(`/api/employees/${id}`,'DELETE');
+  await loadEmployees();toast('🗑️ Employee removed','var(--danger)');
+}
+
+async function loadAndRenderAtt(){
+  updateMonthLabels();
+  const mk=monthKey();
+  [attData,advances,overtime]=await Promise.all([api(`/api/attendance/${mk}`),api(`/api/advances/${mk}`),api(`/api/overtime/${mk}`)]);
+  attData=attData||{};advances=advances||{};overtime=overtime||{};
+  renderAtt();
+}
+
+function daysInMonth(y,m){return new Date(y,m+1,0).getDate();}
+
+function renderAtt(){
+  const cont=document.getElementById('att-list');
+  if(!employees.length){cont.innerHTML=`<div class="empty"><div class="empty-icon">📋</div>Add staff first to mark attendance.</div>`;return;}
+  const days=daysInMonth(curYear,curMonth);
+  cont.innerHTML=employees.map(emp=>{
+    const ed=attData[emp.id]||{};
+    let P=0,A=0,H=0;
+    for(let d=1;d<=days;d++){const s=ed[d];if(s==='present')P++;else if(s==='absent')A++;else if(s==='half')H++;}
+    const grid=Array.from({length:days},(_,i)=>{
+      const d=i+1;const s=ed[d]||'';
+      const lbl=s==='present'?'P':s==='absent'?'A':s==='half'?'½':'·';
+      return `<button class="day-btn ${s}" onclick="cycleDay(${emp.id},${d})" title="Day ${d}"><div class="dn">${d}</div><div class="ds">${lbl}</div></button>`;
+    }).join('');
+    return `<div class="att-card">
+      <div class="att-top">
+        <div><div class="att-name">${emp.name}</div><div class="att-role">${emp.role} · ₹${emp.salary.toLocaleString('en-IN')}/month</div></div>
+        <div style="display:flex;flex-direction:column;gap:9px;align-items:flex-end">
+          <div class="att-chips">
+            <span class="chip chip-g">✓ ${P} Present</span>
+            <span class="chip chip-r">✗ ${A} Absent</span>
+            <span class="chip chip-o">½ ${H} Half</span>
+          </div>
+          <div class="att-actions">
+            <button class="btn btn-w btn-sm" onclick="openAdv(${emp.id},'${emp.name}')">💸 Advance</button>
+            <button class="btn btn-b btn-sm" onclick="openOT(${emp.id},'${emp.name}')">⏱ Overtime</button>
+          </div>
+        </div>
+      </div>
+      <div class="day-grid">${grid}</div>
+    </div>`;
+  }).join('');
+}
+
+async function cycleDay(empId,day){
+  const dateStr=`${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+  const ed=attData[empId]||{};
+  const cur=ed[day]||null;
+  const cycle=[null,'present','absent','half'];
+  const next=cycle[(cycle.indexOf(cur)+1)%cycle.length];
+  if(!attData[empId])attData[empId]={};
+  if(next===null)delete attData[empId][day];else attData[empId][day]=next;
+  renderAtt();
+  await api('/api/attendance','POST',{employee_id:empId,date:dateStr,status:next});
+}
+
+function openAdv(id,name){
+  document.getElementById('adv-emp-id').value=id;
+  document.getElementById('adv-emp-label').textContent='👤 '+name;
+  document.getElementById('adv-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('adv-amt').value='';document.getElementById('adv-note').value='';
+  openModal('m-adv');
+}
+async function saveAdvance(){
+  const amt=parseFloat(document.getElementById('adv-amt').value);
+  if(!amt){toast('⚠️ Enter an amount','var(--warn)');return;}
+  const empId=document.getElementById('adv-emp-id').value;
+  await api('/api/advances','POST',{employee_id:empId,amount:amt,date:document.getElementById('adv-date').value,month_key:monthKey(),note:document.getElementById('adv-note').value});
+  closeModal('m-adv');await loadAndRenderAtt();toast('💸 Advance recorded');
+}
+async function delAdv(id){
+  await api(`/api/advances/${id}`,'DELETE');await loadAndRenderSal();toast('🗑️ Removed','var(--danger)');
+}
+
+function openOT(id,name){
+  document.getElementById('ot-emp-id').value=id;
+  document.getElementById('ot-emp-label').textContent='👤 '+name;
+  document.getElementById('ot-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('ot-hrs').value='';
+  openModal('m-ot');
+}
+async function saveOvertime(){
+  const hrs=parseFloat(document.getElementById('ot-hrs').value);
+  if(!hrs){toast('⚠️ Enter hours','var(--warn)');return;}
+  const empId=document.getElementById('ot-emp-id').value;
+  await api('/api/overtime','POST',{employee_id:empId,hours:hrs,date:document.getElementById('ot-date').value,month_key:monthKey()});
+  closeModal('m-ot');await loadAndRenderAtt();toast('⏱️ Overtime added');
+}
+async function delOT(id){
+  await api(`/api/overtime/${id}`,'DELETE');await loadAndRenderSal();toast('🗑️ Removed','var(--danger)');
+}
+
+function calcSal(emp){
+  const days=daysInMonth(curYear,curMonth);
+  const ed=attData[emp.id]||{};
+  let worked=0;
+  for(let d=1;d<=days;d++){const s=ed[d];if(s==='present')worked+=1;else if(s==='half')worked+=0.5;}
+  const perDay=emp.salary/days;
+  const earned=Math.round(worked*perDay);
+  const advList=advances[emp.id]||[];
+  const advTotal=advList.reduce((s,a)=>s+a.amount,0);
+  const otList=overtime[emp.id]||[];
+  const otHrs=otList.reduce((s,o)=>s+o.hours,0);
+  const otAmt=Math.round(otHrs*emp.ot_rate);
+  const payable=Math.max(0,earned+otAmt-advTotal);
+  return{days,worked,perDay:Math.round(perDay),earned,advTotal,advList,otHrs,otAmt,otList,payable};
+}
+
+async function loadAndRenderSal(){
+  updateMonthLabels();
+  const mk=monthKey();
+  [attData,advances,overtime]=await Promise.all([api(`/api/attendance/${mk}`),api(`/api/advances/${mk}`),api(`/api/overtime/${mk}`)]);
+  attData=attData||{};advances=advances||{};overtime=overtime||{};
+  renderSal();
+}
+
+function renderSal(){
+  const cont=document.getElementById('sal-list');
+  if(!employees.length){cont.innerHTML=`<div class="empty"><div class="empty-icon">💰</div>Add staff first to calculate salary.</div>`;return;}
+  let totalPayable=employees.reduce((s,emp)=>s+calcSal(emp).payable,0);
+
+  const cards=employees.map(emp=>{
+    const s=calcSal(emp);
+    return `<div class="card">
+      <div class="card-header">
+        <div>
+          <div style="font-weight:700;font-size:15.5px">${emp.name} <span class="chip chip-gray" style="font-size:10px;vertical-align:middle">${emp.role}</span></div>
+          <div style="font-size:12px;color:var(--text3);margin-top:3px">Base ₹${emp.salary.toLocaleString('en-IN')}/month · ₹${s.perDay}/day</div>
+        </div>
+        <div class="flex" style="flex-wrap:wrap;gap:6px;">
+          <button class="btn btn-w btn-sm" onclick="openAdv(${emp.id},'${emp.name}')">＋ Advance</button>
+          <button class="btn btn-b btn-sm" onclick="openOT(${emp.id},'${emp.name}')">＋ Overtime</button>
+          <button class="btn btn-o btn-sm" onclick="downloadPDF(${emp.id})">⬇ PDF</button>
+          <button class="btn btn-gold btn-sm" onclick="openFinalize(${emp.id})">✅ Finalize</button>
+        </div>
+      </div>
+      <div class="breakdown">
+        <div class="brow"><span class="brow-label">Total Days (${MONTHS[curMonth]})</span><span class="brow-val">${s.days} days</span></div>
+        <div class="brow"><span class="brow-label">Days Worked</span><span class="brow-val">${s.worked} days</span></div>
+        <div class="brow"><span class="brow-label">Earned Salary</span><span class="brow-val credit">₹${s.earned.toLocaleString('en-IN')}</span></div>
+        ${s.otHrs>0?`<div class="brow"><span class="brow-label">Overtime (${s.otHrs} hrs × ₹${emp.ot_rate})</span><span class="brow-val credit">＋ ₹${s.otAmt.toLocaleString('en-IN')}</span></div>`:''}
+        ${s.advTotal>0?`<div class="brow"><span class="brow-label">Advance Paid (${s.advList.length}×)</span><span class="brow-val deduct">－ ₹${s.advTotal.toLocaleString('en-IN')}</span></div>`:''}
+        <div class="brow total"><span class="brow-label">Net Payable</span><span class="brow-val credit">₹${s.payable.toLocaleString('en-IN')}</span></div>
+      </div>
+      ${s.advList.length?`<div class="hist-wrap"><div class="hist-title">Advance History</div>${s.advList.map(a=>`<div class="hist-item"><span class="hist-left">${a.date}${a.note?' · '+a.note:''}</span><div class="hist-right"><span style="color:var(--warn)" class="mono">－₹${a.amount.toLocaleString('en-IN')}</span><button class="hist-del" onclick="delAdv(${a.id})">✕</button></div></div>`).join('')}</div>`:''}
+      ${s.otList.length?`<div class="hist-wrap"><div class="hist-title">Overtime History</div>${s.otList.map(o=>`<div class="hist-item"><span class="hist-left">${o.date}</span><div class="hist-right"><span style="color:var(--blue)" class="mono">${o.hours}hr · ＋₹${Math.round(o.hours*emp.ot_rate).toLocaleString('en-IN')}</span><button class="hist-del" onclick="delOT(${o.id})">✕</button></div></div>`).join('')}</div>`:''}
+    </div>`;
+  }).join('');
+
+  cont.innerHTML=`<div class="payroll-banner">
+    <div>
+      <div class="payroll-label">${MONTHS[curMonth]} ${curYear} · Total Payroll</div>
+      <div class="payroll-amount">₹${totalPayable.toLocaleString('en-IN')}</div>
+      <div class="payroll-sub">${employees.length} employees</div>
+    </div>
+    <button class="btn btn-o" onclick="downloadAllPDF()">⬇ All Salary Slips</button>
+  </div>${cards}`;
+}
+
+function openFinalize(empId){
+  finalizeEmpId=empId;
+  const emp=employees.find(e=>e.id===empId);
+  const s=calcSal(emp);
+  document.getElementById('fin-summary').innerHTML=`
+    <strong style="color:var(--text)">${emp.name}</strong> · ${MONTHS[curMonth]} ${curYear}<br>
+    Worked: ${s.worked} days · Earned: ₹${s.earned.toLocaleString('en-IN')} · Advance: ₹${s.advTotal.toLocaleString('en-IN')}<br>
+    <strong style="color:var(--gold);font-size:16px">Net Payable: ₹${s.payable.toLocaleString('en-IN')}</strong>
+  `;
+  openModal('m-finalize');
+}
+
+async function confirmFinalize(){
+  const emp=employees.find(e=>e.id===finalizeEmpId);
+  const s=calcSal(emp);
+  const mk=monthKey();
+  const result=await api('/api/salary-history','POST',{
+    employee_id:finalizeEmpId,month_key:mk,month_label:`${MONTHS[curMonth]} ${curYear}`,
+    days_worked:s.worked,total_days:s.days,earned:s.earned,advance:s.advTotal,
+    overtime_amount:s.otAmt,payable:s.payable,base_salary:emp.salary
+  });
+  closeModal('m-finalize');
+  if(result && result.success){
+    toast(`✅ ${emp.name}'s salary finalized`);
+    salaryHistory = await api('/api/salary-history')||[];
+  } else {
+    toast('⚠️ Could not finalize. Try again.','var(--danger)');
+  }
+}
+
+function updateHistoryFilter(){
+  const sel=document.getElementById('hist-emp-filter');
+  const cur=sel.value;
+  sel.innerHTML='<option value="all">All Employees</option>'+employees.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+  sel.value=cur;
+}
+
+async function delHistory(id){
+  if(!confirm('Delete this salary history record? This cannot be undone.'))return;
+  await api(`/api/salary-history/${id}`,'DELETE');
+  salaryHistory = await api('/api/salary-history')||[];
+  renderHistory();
+  toast('🗑️ History record deleted','var(--danger)');
+}
+
+async function loadAndRenderHistory(){
+  const data=await api('/api/salary-history');
+  salaryHistory=Array.isArray(data)?data:[];
+  renderHistory();
+}
+
+function renderHistory(){
+  const cont=document.getElementById('hist-list');
+  const filterEmpId=document.getElementById('hist-emp-filter').value;
+  let records=salaryHistory||[];
+  if(filterEmpId!=='all') records=records.filter(r=>String(r.employee_id)===filterEmpId);
+
+  if(!records.length){
+    cont.innerHTML=`<div class="empty"><div class="empty-icon">🕐</div>No history yet.<br><small>Click "Finalize" on the Salary tab to save a month here.</small></div>`;
+    return;
+  }
+
+  const byMonth={};
+  records.forEach(r=>{
+    if(!byMonth[r.month_key])byMonth[r.month_key]={label:r.month_label,records:[]};
+    byMonth[r.month_key].records.push(r);
+  });
+
+  const sortedMonths=Object.keys(byMonth).sort().reverse();
+  cont.innerHTML=sortedMonths.map(mk=>{
+    const grp=byMonth[mk];
+    const totalPayable=grp.records.reduce((s,r)=>s+r.payable,0);
+    const rows=grp.records.map(r=>{
+      const emp=employees.find(e=>e.id===r.employee_id);
+      return `<div class="hist-item" style="margin-bottom:7px;">
+        <div class="hist-left">
+          <strong style="color:var(--text)">${emp?emp.name:'Employee'}</strong>
+          <span class="chip chip-gray" style="margin-left:6px;font-size:10px">${emp?emp.role:''}</span><br>
+          <span style="font-size:11px">Worked ${r.days_worked}/${r.total_days} days · Base ₹${r.base_salary.toLocaleString('en-IN')}</span>
+        </div>
+        <div class="hist-right" style="align-items:center;gap:10px;">
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
+            <span class="mono" style="color:var(--g1);font-weight:700;font-size:15px">₹${r.payable.toLocaleString('en-IN')}</span>
+            ${r.advance>0?`<span style="font-size:11px;color:var(--warn)">Advance: ₹${r.advance.toLocaleString('en-IN')}</span>`:''}
+            ${r.overtime_amount>0?`<span style="font-size:11px;color:var(--blue)">OT: ₹${r.overtime_amount.toLocaleString('en-IN')}</span>`:''}
+          </div>
+          <button class="hist-del" onclick="delHistory(${r.id})" title="Delete this record">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div class="card">
+      <div class="card-header">
+        <div>
+          <div style="font-weight:700;font-size:15.5px">${grp.label}</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px">${grp.records.length} employees</div>
+        </div>
+        <div class="mono" style="font-size:21px;font-weight:800;color:var(--gold)">₹${totalPayable.toLocaleString('en-IN')}</div>
+      </div>
+      ${rows}
+    </div>`;
+  }).join('');
+}
+
+function fmtRs(n){ return 'Rs. ' + Math.round(n).toLocaleString('en-IN'); }
+
+function downloadPDF(empId){
+  const{jsPDF}=window.jspdf;
+  const emp=employees.find(e=>e.id===empId);
+  const s=calcSal(emp);
+  const doc=new jsPDF();
+  const mk=monthKey();
+
+  doc.setFillColor(22,163,74);doc.rect(0,0,210,32,'F');
+  doc.setFillColor(240,180,41);doc.rect(0,30,210,2,'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(20);doc.setFont('helvetica','bold');
+  doc.text('StaffMark',14,14);
+  doc.setFontSize(10);doc.setFont('helvetica','normal');
+  doc.text('Green Integrated Pest Control - Salary Slip',14,22);
+
+  doc.setFillColor(245,250,245);doc.roundedRect(14,40,182,28,3,3,'F');
+  doc.setTextColor(20,20,20);
+  doc.setFontSize(14);doc.setFont('helvetica','bold');
+  doc.text(emp.name,20,52);
+  doc.setFontSize(10);doc.setFont('helvetica','normal');
+  doc.setTextColor(100,100,100);
+  doc.text(`${emp.role}`,20,60);
+  doc.text(`Period: ${MONTHS[curMonth]} ${curYear}`,130,52);
+  if(emp.phone)doc.text(`Mobile: ${emp.phone}`,130,60);
+
+  let y=80;
+  const tableRows=[
+    ['Total Days in Month',`${s.days} days`,''],
+    ['Days Worked',`${s.worked} days`,`@ ${fmtRs(s.perDay)}/day`],
+    ['Earned Salary','',fmtRs(s.earned)],
+  ];
+  if(s.otHrs>0)tableRows.push([`Overtime`,`${s.otHrs} hrs x ${fmtRs(emp.ot_rate)}/hr`,`+ ${fmtRs(s.otAmt)}`]);
+  if(s.advTotal>0)tableRows.push([`Advance Paid`,`${s.advList.length} transaction(s)`,`- ${fmtRs(s.advTotal)}`]);
+
+  doc.setFillColor(240,250,240);doc.rect(14,y-6,182,10,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(60,120,60);
+  doc.text('DESCRIPTION',18,y);doc.text('DETAILS',95,y);doc.text('AMOUNT',196,y,{align:'right'});
+  y+=8;
+  doc.setDrawColor(200,220,200);doc.line(14,y,196,y);y+=6;
+
+  tableRows.forEach(([a,b,c])=>{
+    doc.setFont('helvetica','normal');doc.setFontSize(11);doc.setTextColor(50,50,50);
+    doc.text(a,18,y);
+    if(b){doc.setTextColor(100,100,100);doc.setFontSize(10);doc.text(b,95,y);}
+    doc.setFontSize(11);doc.setTextColor(c.startsWith('+')? 22:c.startsWith('-')?200:50, c.startsWith('+')? 163:c.startsWith('-')?50:50, c.startsWith('+')? 74:c.startsWith('-')?50:50);
+    doc.text(c,196,y,{align:'right'});
+    doc.setDrawColor(230,230,230);doc.line(14,y+4,196,y+4);
+    y+=12;
+  });
+
+  y+=4;
+  doc.setFillColor(22,163,74);doc.roundedRect(14,y-7,182,16,3,3,'F');
+  doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(13);
+  doc.text('NET PAYABLE',18,y+3);
+  doc.text(fmtRs(s.payable),196,y+3,{align:'right'});
+
+  if(s.advList.length){
+    y+=22;
+    doc.setTextColor(60,60,60);doc.setFontSize(10);doc.setFont('helvetica','bold');
+    doc.text('Advance Breakdown:',14,y);
+    s.advList.forEach(a=>{y+=8;doc.setFont('helvetica','normal');doc.text(`${a.date}  ${a.note||''}`,18,y);doc.text(fmtRs(a.amount),196,y,{align:'right'});});
+  }
+
+  doc.setTextColor(160,160,160);doc.setFontSize(8);doc.setFont('helvetica','normal');
+  doc.text(`Generated by StaffMark - Green Integrated Pest Control - ${new Date().toLocaleDateString('en-IN')}`,14,287);
+  doc.save(`SalarySlip_${emp.name}_${mk}.pdf`);
+  toast(`📄 ${emp.name}'s slip ready`);
+}
+
+function downloadAllPDF(){employees.forEach(e=>downloadPDF(e.id));toast('📄 Downloading all slips');}
+
+(async()=>{
+  await checkAuth();
+  updateMonthLabels();
+  document.getElementById('a-join').value=new Date().toISOString().split('T')[0];
+  await loadEmployees();
+})();
+</script>
+</body>
+</html>
